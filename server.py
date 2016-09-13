@@ -32,7 +32,30 @@ class MyWebServer(SocketServer.BaseRequestHandler):
     def handle(self):
         self.data = self.request.recv(1024).strip()
         print ("Got a request of: %s\n" % self.data)
-        self.request.sendall("OK")
+        #self.request.sendall("Socket works.")
+        print "Client address: %s" % self.client_address[0]
+        #just put response in sendall? IT WORKS!
+        self.request.sendall("""HTTP/1.1 200 ok\n\n<!DOCTYPE html>
+            <html>
+            <head>
+                <title>Example Page</title>
+                    <meta http-equiv="Content-Type"
+                    content="text/html;charset=utf-8"/>
+                    <!-- check conformance at http://validator.w3.org/check -->
+                    <link rel="stylesheet" type="text/css" href="base.css">
+            </head>
+
+            <body>
+                <div class="eg">
+                    <h1>An Example Page</h1>
+                    <ul>
+                        <li>It works?
+                                    <li><a href="deep/index.html">A deeper page</a></li>
+                    </ul>
+                </div>
+            </body>
+            </html> 
+        """)
 
 if __name__ == "__main__":
     HOST, PORT = "localhost", 8080
