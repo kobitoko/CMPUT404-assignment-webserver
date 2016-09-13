@@ -1,6 +1,9 @@
 #  coding: utf-8 
 import SocketServer
 
+# https://docs.python.org/2/library/os.path.html
+import os.path
+
 # Copyright 2013 Abram Hindle, Eddie Antonio Santos
 # 
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -30,12 +33,25 @@ import SocketServer
 class MyWebServer(SocketServer.BaseRequestHandler):
     
     def handle(self):
-        responseHeader = "HTTP/1.1 200 ok"
-        file = open("www/index.html", 'r')
-        contents = file.read()
         self.data = self.request.recv(1024).strip()
         print ("Got a request of: %s\n" % self.data)
         print "Client address: %s" % self.client_address[0]
+        
+        a = self.data.split(" ")
+        
+        responseHeader = "HTTP/1.1 200 ok"
+        
+        path = a[1]
+        print("\n" + path + " \n")
+        print(os.path.isfile(os.curdir + path))
+        #check if file or dir exist.
+        if(os.path.isfile(os.curdir + path)):
+            print("aaa" + "\n")
+        if(os.path.isdir(os.curdir + path)):
+            print("bbb" + "\n")
+        #file = open(a, 'r')
+        file = open("www/index.html", 'r')
+        contents = file.read()
         # sendto for udp.
         #self.request.sendto("hi", self.client_address)
         # sendall for tcp according to
