@@ -29,6 +29,7 @@ import os.path
 
 # try: curl -v -X GET http://127.0.0.1:8080/
 
+# http response standard https://www.w3.org/Protocols/rfc2616/rfc2616-sec6.html
 
 class MyWebServer(SocketServer.BaseRequestHandler):
     
@@ -41,17 +42,22 @@ class MyWebServer(SocketServer.BaseRequestHandler):
         
         responseHeader = "HTTP/1.1 200 ok"
         
-        path = a[1]
+        path = "/www/" + a[1]
+        # normalize case and convert slashes, and collapse redundant separators.
+        path = os.path.normpath(os.path.normcase(path))
         print("\n" + path + " \n")
         print(os.path.isfile(os.curdir + path))
+        
+        if(os.path.isdir(os.curdir + path)):
+            path += "/index.html"
+        contents = ""
+        #file = open("www/index.html", 'r')
+        #contents = file.read()
         #check if file or dir exist.
         if(os.path.isfile(os.curdir + path)):
             print("aaa" + "\n")
-        if(os.path.isdir(os.curdir + path)):
-            print("bbb" + "\n")
-        #file = open(a, 'r')
-        file = open("www/index.html", 'r')
-        contents = file.read()
+            file = open(path[1:], 'r')
+            contents = file.read()
         # sendto for udp.
         #self.request.sendto("hi", self.client_address)
         # sendall for tcp according to
