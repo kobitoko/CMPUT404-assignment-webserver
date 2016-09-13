@@ -30,32 +30,18 @@ import SocketServer
 class MyWebServer(SocketServer.BaseRequestHandler):
     
     def handle(self):
+        responseHeader = "HTTP/1.1 200 ok"
+        file = open("www/index.html", 'r')
+        contents = file.read()
         self.data = self.request.recv(1024).strip()
         print ("Got a request of: %s\n" % self.data)
-        #self.request.sendall("Socket works.")
         print "Client address: %s" % self.client_address[0]
-        #just put response in sendall? IT WORKS!
-        self.request.sendall("""HTTP/1.1 200 ok\n\n<!DOCTYPE html>
-            <html>
-            <head>
-                <title>Example Page</title>
-                    <meta http-equiv="Content-Type"
-                    content="text/html;charset=utf-8"/>
-                    <!-- check conformance at http://validator.w3.org/check -->
-                    <link rel="stylesheet" type="text/css" href="base.css">
-            </head>
+        # sendto for udp.
+        #self.request.sendto("hi", self.client_address)
+        # sendall for tcp according to
+        # https://docs.python.org/2/library/socketserver.html#examples
+        self.request.sendall(responseHeader + "\n" + contents)
 
-            <body>
-                <div class="eg">
-                    <h1>An Example Page</h1>
-                    <ul>
-                        <li>It works?
-                                    <li><a href="deep/index.html">A deeper page</a></li>
-                    </ul>
-                </div>
-            </body>
-            </html> 
-        """)
 
 if __name__ == "__main__":
     HOST, PORT = "localhost", 8080
