@@ -35,6 +35,36 @@ class MyWebServer(SocketServer.BaseRequestHandler):
     
     requestHeader = []
     
+    def checkIsDir(self, pathStr):
+        return os.path.isdir(os.curdir + pathStr)
+        
+    def checkIsFile(self, pathStr):
+        return os.path.isfile(os.curdir + pathStr)
+
+    def openTextFile(self, pathStr):
+        file = open(pathStr[1:], 'r')
+        return file.read()
+        
+    # Retrieves and access path. 
+    # Assumes request header is a list splitted by space.
+    def retrievePath(self, requestHeaderList):
+        path = "/www/"
+        if(len(requestHeaderList) >=1):
+            path += requestHeaderList[1]
+        # normalize case and convert slashes, and collapse redundant separators.
+        path = os.path.normpath(os.path.normcase(path))
+        #handle the 404 (technically 403 but 404 is safer): path - os.curdir if it is not www/ then call error!
+        if(os.path.isdir(os.curdir + path)):
+            #better to post a 302 and redirect.
+            path += "/index.html"
+        contents = ""
+        #check if file or dir exist.
+        print("aaa: " + path + "\n")
+        if(os.path.isfile(os.curdir + path)):
+            file = open(path[1:], 'r')
+            contents = file.read()
+        return contents
+            
     def handle(self):
         self.data = self.request.recv(1024).strip()
         print ("Got a request of: %s\n" % self.data)
@@ -44,33 +74,14 @@ class MyWebServer(SocketServer.BaseRequestHandler):
         
         responseHeader = "HTTP/1.1 200 ok"
         
-        path = "/www/" 
-        if(len(requestHeader) >=1):
-            path += requestHeader[1]
-        # normalize case and convert slashes, and collapse redundant separators.
-        path = os.path.normpath(os.path.normcase(path))
-        print("\n" + path + " \n")
-        print(os.curdir + path + " \n")
+        responseContent = ""        
+        responseContent = self.retrievePath(requestHeader[1])
         
-        #handle the 404 (technically 403 but 404 is safer): path - os.curdir if it is not www/ then call error!
-        
-        if(os.path.isdir(os.curdir + path)):
-            #better to post a 302 and redirect.
-            path += "/index.html"
-        contents = ""
-        #file = open("www/index.html", 'r')
-        #contents = file.read()
-        #check if file or dir exist.
-        if(os.path.isfile(os.curdir + path)):
-            print("aaa" + "\n")
-            file = open(path[1:], 'r')
-            contents = file.read()
         # sendto for udp.
         #self.request.sendto("hi", self.client_address)
         # sendall for tcp according to
         # https://docs.python.org/2/library/socketserver.html#examples
-        self.request.sendall(responseHeader + "\n" + contents)
-
+        self.request.sendall(responseHeader + "\n" + responseContent)
 
 if __name__ == "__main__":
     HOST, PORT = "localhost", 8080
