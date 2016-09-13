@@ -33,22 +33,29 @@ import os.path
 
 class MyWebServer(SocketServer.BaseRequestHandler):
     
+    requestHeader = []
+    
     def handle(self):
         self.data = self.request.recv(1024).strip()
         print ("Got a request of: %s\n" % self.data)
         print "Client address: %s" % self.client_address[0]
         
-        a = self.data.split(" ")
+        requestHeader = self.data.split(" ")
         
         responseHeader = "HTTP/1.1 200 ok"
         
-        path = "/www/" + a[1]
+        path = "/www/" 
+        if(len(requestHeader) >=1):
+            path += requestHeader[1]
         # normalize case and convert slashes, and collapse redundant separators.
         path = os.path.normpath(os.path.normcase(path))
         print("\n" + path + " \n")
-        print(os.path.isfile(os.curdir + path))
+        print(os.curdir + path + " \n")
+        
+        #handle the 404 (technically 403 but 404 is safer): path - os.curdir if it is not www/ then call error!
         
         if(os.path.isdir(os.curdir + path)):
+            #better to post a 302 and redirect.
             path += "/index.html"
         contents = ""
         #file = open("www/index.html", 'r')
