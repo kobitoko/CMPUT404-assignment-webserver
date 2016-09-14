@@ -51,7 +51,8 @@ class MyWebServer(SocketServer.BaseRequestHandler):
         path = "/www/"
         if(len(requestHeaderList) >=1):
             path += requestHeaderList[1]
-        # normalize case and convert slashes, and collapse redundant separators.
+        # normalize case, convert slashes, collapse redundant separators,
+        # and removes up-level references.
         path = os.path.normpath(os.path.normcase(path))
         #handle the 404 (technically 403 but 404 is safer): path - os.curdir if it is not www/ then call error!
         if(os.path.isdir(os.curdir + path)):
