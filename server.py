@@ -75,7 +75,7 @@ class MyWebServer(SocketServer.BaseRequestHandler):
         responseHeader = "HTTP/1.1 200 ok"
         
         responseContent = ""        
-        responseContent = self.retrievePath(requestHeader[1])
+        responseContent = self.retrievePath(requestHeader)
         
         # sendto for udp.
         #self.request.sendto("hi", self.client_address)
