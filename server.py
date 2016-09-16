@@ -4,7 +4,7 @@ import SocketServer
 # https://docs.python.org/2/library/os.path.html
 import os.path
 
-# Copyright 2013 Abram Hindle, Eddie Antonio Santos
+# Copyright 2016 Abram Hindle, Eddie Antonio Santos, Preyanshu Kumar, Ryan Satyabrata
 # 
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ import os.path
 #
 #
 # Furthermore it is derived from the Python documentation examples thus
-# some of the code is Copyright © 2001-2013 Python Software
+# some of the code is Copyright © 2001-2016 Python Software
 # Foundation; All Rights Reserved
 #
 # http://docs.python.org/2/library/socketserver.html
