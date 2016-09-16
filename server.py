@@ -55,12 +55,16 @@ class MyWebServer(SocketServer.BaseRequestHandler):
         # and removes up-level references.
         path = os.path.normpath(os.path.normcase(path))
         #handle the 404 (technically 403 but 404 is safer): path - os.curdir if it is not www/ then call error!
+        
+        # if a dir is given like this something.com/poo
+        # make sure the dir will redirect to something.com/poo/
+        # so that a file can be found inside the poo folder e.g. css or img
         if(os.path.isdir(os.curdir + path)):
             #better to post a 302 and redirect.
             path += "/index.html"
         contents = ""
         #check if file or dir exist.
-        print("aaa: " + path + "\n")
+        print("Path request is: " + path + "\n")
         if(os.path.isfile(os.curdir + path)):
             file = open(path[1:], 'r')
             contents = file.read()
@@ -77,6 +81,8 @@ class MyWebServer(SocketServer.BaseRequestHandler):
         
         responseContent = ""        
         responseContent = self.retrievePath(requestHeader)
+        
+        print("\nResponseContent\n" + responseContent)
         
         # sendto for udp.
         #self.request.sendto("hi", self.client_address)
