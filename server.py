@@ -68,7 +68,10 @@ class MyWebServer(SocketServer.BaseRequestHandler):
         elif (fileName == "png"):
             type = "image"
             self.responseHeader += "Content-Type: image/png"
-        
+        elif (fileName == "gif"):
+            type = "image"
+            self.responseHeader += "Content-Type: image/gif"
+            
         if (type == "text"):
             return self.openTextFile(filepath)
         elif (type == "image"):
