@@ -35,6 +35,7 @@ class MyWebServer(SocketServer.BaseRequestHandler):
 
     requestHeader = []
     responseHeader="HTTP/1.1 "
+    contents=""
     
 
     def checkIsDir(self, pathStr):
@@ -48,11 +49,31 @@ class MyWebServer(SocketServer.BaseRequestHandler):
         file = open(pathStr[1:], 'r')
         return file.read()
 
-    def mimeTypeCheck(self, fileName):
-        if (fileName[1] == "html"):
+    def openBinary(self, pathStr):
+        file = open(pathStr[1:], 'rb')
+        return file.read()
+        
+    def mimeTypeGet(self, filepath):
+        fileName = filepath.split('.')[-1]
+        type = ""
+        if (fileName == "html"):
+            type = "text"
             self.responseHeader += "Content-Type: text/html;"
-        elif (fileName[1] == "css"):
+        elif (fileName == "css"):
+            type = "text"
             self.responseHeader += "Content-Type: text/css;"
+        elif (fileName == "jpg" or fileName == "jpeg"):
+            type = "image"
+            self.responseHeader += "Content-Type: image/jpeg"
+        elif (fileName == "png"):
+            type = "image"
+            self.responseHeader += "Content-Type: image/png"
+        
+        if (type == "text"):
+            return self.openTextFile(filepath)
+        elif (type == "image"):
+            return self.openBinary(filepath)
+            
         
     # Retrieves and access path. 
     # Assumes request header is a list splitted by space.
@@ -63,7 +84,7 @@ class MyWebServer(SocketServer.BaseRequestHandler):
         # normalize case, convert slashes, collapse redundant separators,
         # and removes up-level references.
         path = os.path.normpath(os.path.normcase(path))
-        #handle the 404 (technically 403 but 404 is safer): path - os.curdir if it is not www/ then call error!
+        #handle the 404 (technically 403 but 404 is safer)
         
         # if a dir is given like this something.com/poo
         # make sure the dir will redirect to something.com/poo/
@@ -71,20 +92,15 @@ class MyWebServer(SocketServer.BaseRequestHandler):
         if(os.path.isdir(os.curdir + path)):
             #better to post a 302 and redirect.
             path += "/index.html"
-        contents = ""
         #check if file or dir exist.
         print("Path request is: " + path + "\n")
         #checking if it is a file and printing 200 code if it is ok
         if(os.path.isfile(os.curdir + path)):
             self.responseHeader += "200 OK\r\n"
-            fileName = path.split('.')
-            #checking for mimetypes
-            self.mimeTypeCheck(fileName)
-            file = open(path[1:], 'r')
-            contents = file.read()
+            #checking for mimetypes and reading them into content.
+            self.contents = self.mimeTypeGet(path)
         else:
             self.responseHeader += "404 NOT FOUND\r\n"
-        return contents
             
     def handle(self):
         self.data = self.request.recv(1024).strip()
@@ -93,15 +109,11 @@ class MyWebServer(SocketServer.BaseRequestHandler):
         
         requestHeader = self.data.split(" ")
         
-        responseContent = ""        
-        responseContent = self.retrievePath(requestHeader)
-
-        # sendto for udp.
-        #self.request.sendto("hi", self.client_address)
+        self.retrievePath(requestHeader)
         
         # sendall for tcp according to https://docs.python.org/2/library/socketserver.html#examples
         # Needs empty line to show end of header. Also using windows CR-LF new lines.
-        self.request.sendall(self.responseHeader + "\r\n\r\n" + responseContent)
+        self.request.sendall(self.responseHeader + "\r\n\r\n" + self.contents)
 
 if __name__ == "__main__":
     HOST, PORT = "localhost", 8080
