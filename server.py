@@ -34,7 +34,7 @@ import os.path
 class MyWebServer(SocketServer.BaseRequestHandler):
 
     requestHeader = []
-    responseHeader="HTTP/1.1 "
+    responseHeader=""
     contents=""
     
 
@@ -95,16 +95,19 @@ class MyWebServer(SocketServer.BaseRequestHandler):
         # so that a file can be found inside the poo folder e.g. css or img
         if(os.path.isdir(os.curdir + path)):
             #better to post a 302 and redirect.
+            self.responseHeader += "HTTP/1.1 302 FOUND\r\n"
             path += "/index.html"
+            self.contents = self.mimeTypeGet(path)
+            self.responseHeader+="\n\n"
         #check if file or dir exist.
         print("Path request is: " + path + "\n")
         #checking if it is a file and printing 200 code if it is ok
         if(os.path.isfile(os.curdir + path)):
-            self.responseHeader += "200 OK\r\n"
+            self.responseHeader += "HTTP/1.1 200 OK\r\n"
             #checking for mimetypes and reading them into content.
             self.contents = self.mimeTypeGet(path)
         else:
-            self.responseHeader += "404 NOT FOUND\r\n"
+            self.responseHeader += "HTTP/1.1 404 NOT FOUND\r\n"
             self.contents = "<html><head></head><body><h1>404 NOT FOUND</h1></body></html>"
             
     def handle(self):
