@@ -97,6 +97,8 @@ class MyWebServer(SocketServer.BaseRequestHandler):
             if(path[-1] != "/"):
                 path += "/";
                 self.responseHeader += "HTTP/1.1 301 MOVED PERMANENTLY\r\n"
+                self.responseHeader += "Location: " + path +"\r\n"
+                return
                 #redirect to path with that /.
             #don't redirect for index.
             path += "index.html"
