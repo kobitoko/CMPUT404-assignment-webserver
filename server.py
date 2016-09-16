@@ -85,24 +85,29 @@ class MyWebServer(SocketServer.BaseRequestHandler):
         path = "/www/"
         if(len(requestHeaderList) > 1):
             path += requestHeaderList[1]
+        # last / dir workaround for os.path.normpath
+        endDirGood = False
+        if(path[-1] == "/"):
+            endDirGood = True
         # normalize case, convert slashes, collapse redundant separators,
-        # and removes up-level references.
+        # and removes up-level references. 
+        # ALSO removes the very last / which is bad for dirs.
         path = os.path.normpath(os.path.normcase(path))
         #handle the 404 (technically 403 but 404 is safer)
-        
+        if(endDirGood):
+            path += "/"
         # if a dir is given like this something.com/poo
         # make sure the dir will redirect to something.com/poo/
         # so that a file can be found inside the poo folder e.g. css or img
         if(os.path.isdir(os.curdir + path)):
             if(path[-1] != "/"):
-                path += "/";
+                path += "/"
                 self.responseHeader += "HTTP/1.1 301 MOVED PERMANENTLY\r\n"
-                self.responseHeader += "Location: " + path +"\r\n"
+                self.responseHeader += "Location: " + path[4:] +"\r\n"
                 return
                 #redirect to path with that /.
             #don't redirect for index.
             path += "index.html"
-            self.contents = self.mimeTypeGet(path)
         #check if file or dir exist.
         print("Path request is: " + path + "\n")
         #checking if it is a file and printing 200 code if it is ok
