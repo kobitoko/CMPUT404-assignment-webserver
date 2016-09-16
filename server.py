@@ -76,14 +76,14 @@ class MyWebServer(SocketServer.BaseRequestHandler):
         print("Path request is: " + path + "\n")
         #checking if it is a file and printing 200 code if it is ok
         if(os.path.isfile(os.curdir + path)):
-            self.responseHeader += "200 OK\n"
+            self.responseHeader += "200 OK\r\n"
             fileName = path.split('.')
             #checking for mimetypes
             self.mimeTypeCheck(fileName)
             file = open(path[1:], 'r')
             contents = file.read()
         else:
-            self.responseHeader += "404 NOT FOUND\n"
+            self.responseHeader += "404 NOT FOUND\r\n"
         return contents
             
     def handle(self):
@@ -96,13 +96,12 @@ class MyWebServer(SocketServer.BaseRequestHandler):
         responseContent = ""        
         responseContent = self.retrievePath(requestHeader)
 
-        print("\nResponseContent\n" + responseContent)
-
         # sendto for udp.
         #self.request.sendto("hi", self.client_address)
-        # sendall for tcp according to
-        # https://docs.python.org/2/library/socketserver.html#examples
-        self.request.sendall(self.responseHeader + "\n" + responseContent)
+        
+        # sendall for tcp according to https://docs.python.org/2/library/socketserver.html#examples
+        # Needs empty line to show end of header. Also using windows CR-LF new lines.
+        self.request.sendall(self.responseHeader + "\r\n\r\n" + responseContent)
 
 if __name__ == "__main__":
     HOST, PORT = "localhost", 8080
