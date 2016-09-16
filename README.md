@@ -7,6 +7,8 @@ See requirements.org (plain-text) for a description of the project.
 
 Make a simple webserver.
 
+Cats can be found at 127.0.0.1:8080/deep/aaa/
+
 Contributors / Licensing
 ========================
 
