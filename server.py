@@ -94,8 +94,11 @@ class MyWebServer(SocketServer.BaseRequestHandler):
         # make sure the dir will redirect to something.com/poo/
         # so that a file can be found inside the poo folder e.g. css or img
         if(os.path.isdir(os.curdir + path)):
-            #better to post a 302 and redirect.
-            path += "/index.html"
+            if(path[-1] != "/"):
+                path += "/";
+                #redirect to path with that /.
+            #don't redirect for index.
+            path += "index.html"
         #check if file or dir exist.
         print("Path request is: " + path + "\n")
         #checking if it is a file and printing 200 code if it is ok
