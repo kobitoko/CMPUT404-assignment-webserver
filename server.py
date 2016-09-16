@@ -105,6 +105,7 @@ class MyWebServer(SocketServer.BaseRequestHandler):
             self.contents = self.mimeTypeGet(path)
         else:
             self.responseHeader += "404 NOT FOUND\r\n"
+            self.contents = "<html><head></head><body><h1>404 NOT FOUND</h1></body></html>"
             
     def handle(self):
         self.data = self.request.recv(1024).strip()
