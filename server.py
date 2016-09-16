@@ -29,7 +29,7 @@ import os.path
 
 # try: curl -v -X GET http://127.0.0.1:8080/
 
-# http response standard https://www.w3.org/Protocols/rfc2616/rfc2616-sec6.html
+# Used for reference the http response standard https://www.w3.org/Protocols/rfc2616/rfc2616-sec6.html
 
 class MyWebServer(SocketServer.BaseRequestHandler):
 
@@ -37,7 +37,6 @@ class MyWebServer(SocketServer.BaseRequestHandler):
     responseHeader=""
     contents=""
     
-
     def checkIsDir(self, pathStr):
         return os.path.isdir(os.curdir + pathStr)
         
@@ -77,8 +76,7 @@ class MyWebServer(SocketServer.BaseRequestHandler):
             return self.openTextFile(filepath)
         elif (type == "image"):
             return self.openBinary(filepath)
-            
-        
+    
     # Retrieves and access path. 
     # Assumes request header is a list splitted by space.
     def retrievePath(self, requestHeaderList):
@@ -89,11 +87,12 @@ class MyWebServer(SocketServer.BaseRequestHandler):
         endDirGood = False
         if(path[-1] == "/"):
             endDirGood = True
-        # normalize case, convert slashes, collapse redundant separators,
+        # Normalize case, convert slashes, collapse redundant separators,
         # and removes up-level references. 
         # ALSO removes the very last / which is bad for dirs.
+        # Normalized taken from python documentations
+        # https://docs.python.org/2/library/os.path.html
         path = os.path.normpath(os.path.normcase(path))
-        #handle the 404 (technically 403 but 404 is safer)
         if(endDirGood):
             path += "/"
         # if a dir is given like this something.com/poo
@@ -101,15 +100,13 @@ class MyWebServer(SocketServer.BaseRequestHandler):
         # so that a file can be found inside the poo folder e.g. css or img
         if(os.path.isdir(os.curdir + path)):
             if(path[-1] != "/"):
+                # Redirect to path with that / at the end of the url.
                 path += "/"
                 self.responseHeader += "HTTP/1.1 301 MOVED PERMANENTLY\r\n"
                 self.responseHeader += "Location: " + path[4:] +"\r\n"
                 return
-                #redirect to path with that /.
-            #don't redirect for index.
+            # Do not redirect for index.
             path += "index.html"
-        #check if file or dir exist.
-        print("Path request is: " + path + "\n")
         #checking if it is a file and printing 200 code if it is ok
         if(os.path.isfile(os.curdir + path)):
             self.responseHeader += "HTTP/1.1 200 OK\r\n"
@@ -123,9 +120,7 @@ class MyWebServer(SocketServer.BaseRequestHandler):
         self.data = self.request.recv(1024).strip()
         print ("Got a request of: %s\n" % self.data)
         print "Client address: %s" % self.client_address[0]
-        
         requestHeader = self.data.split(" ")
-        
         self.retrievePath(requestHeader)
         
         # sendall for tcp according to https://docs.python.org/2/library/socketserver.html#examples

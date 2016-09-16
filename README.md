@@ -19,7 +19,12 @@ server.py contains contributions from:
 * Eddie Antonio Santos
 * Preyanshu Kumar
 * Ryan Satyabrata
-
+  
+References used:  
+Python Documentation https://docs.python.org/2/library/os.path.html  
+Python Documentation https://docs.python.org/2/library/socketserver.html#examples
+RFC 2616 Fielding, et al. https://www.w3.org/Protocols/rfc2616/rfc2616-sec6.html  
+  
 But the server.py example is derived from the python documentation
 examples thus some of the code is Copyright © 2001-2013 Python
 Software Foundation; All Rights Reserved under the PSF license (GPL
