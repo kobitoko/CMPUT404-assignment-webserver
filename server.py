@@ -54,6 +54,7 @@ class MyWebServer(SocketServer.BaseRequestHandler):
         return file.read()
         
     def mimeTypeGet(self, filepath):
+        # Usually the extension is the last bit after the "."
         fileName = filepath.split('.')[-1]
         type = ""
         if (fileName == "html"):
@@ -82,7 +83,7 @@ class MyWebServer(SocketServer.BaseRequestHandler):
     # Assumes request header is a list splitted by space.
     def retrievePath(self, requestHeaderList):
         path = "/www/"
-        if(len(requestHeaderList) >=1):
+        if(len(requestHeaderList) > 1):
             path += requestHeaderList[1]
         # normalize case, convert slashes, collapse redundant separators,
         # and removes up-level references.
