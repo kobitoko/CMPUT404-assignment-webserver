@@ -32,18 +32,27 @@ import os.path
 # http response standard https://www.w3.org/Protocols/rfc2616/rfc2616-sec6.html
 
 class MyWebServer(SocketServer.BaseRequestHandler):
-    
+
     requestHeader = []
+    responseHeader="HTTP/1.1 "
     
+
     def checkIsDir(self, pathStr):
         return os.path.isdir(os.curdir + pathStr)
         
     def checkIsFile(self, pathStr):
+
         return os.path.isfile(os.curdir + pathStr)
 
     def openTextFile(self, pathStr):
         file = open(pathStr[1:], 'r')
         return file.read()
+
+    def mimeTypeCheck(self, fileName):
+        if (fileName[1] == "html"):
+            self.responseHeader += "Content-Type: text/html;"
+        elif (fileName[1] == "css"):
+            self.responseHeader += "Content-Type: text/css;"
         
     # Retrieves and access path. 
     # Assumes request header is a list splitted by space.
@@ -65,9 +74,16 @@ class MyWebServer(SocketServer.BaseRequestHandler):
         contents = ""
         #check if file or dir exist.
         print("Path request is: " + path + "\n")
+        #checking if it is a file and printing 200 code if it is ok
         if(os.path.isfile(os.curdir + path)):
+            self.responseHeader += "200 OK\n"
+            fileName = path.split('.')
+            #checking for mimetypes
+            self.mimeTypeCheck(fileName)
             file = open(path[1:], 'r')
             contents = file.read()
+        else:
+            self.responseHeader += "404 NOT FOUND\n"
         return contents
             
     def handle(self):
@@ -77,18 +93,16 @@ class MyWebServer(SocketServer.BaseRequestHandler):
         
         requestHeader = self.data.split(" ")
         
-        responseHeader = "HTTP/1.1 200 ok"
-        
         responseContent = ""        
         responseContent = self.retrievePath(requestHeader)
-        
+
         print("\nResponseContent\n" + responseContent)
-        
+
         # sendto for udp.
         #self.request.sendto("hi", self.client_address)
         # sendall for tcp according to
         # https://docs.python.org/2/library/socketserver.html#examples
-        self.request.sendall(responseHeader + "\n" + responseContent)
+        self.request.sendall(self.responseHeader + "\n" + responseContent)
 
 if __name__ == "__main__":
     HOST, PORT = "localhost", 8080
