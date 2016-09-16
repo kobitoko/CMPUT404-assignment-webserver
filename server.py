@@ -34,7 +34,7 @@ import os.path
 class MyWebServer(SocketServer.BaseRequestHandler):
 
     requestHeader = []
-    responseHeader="HTTP/1.1 "
+    responseHeader=""
     contents=""
     
 
@@ -96,18 +96,20 @@ class MyWebServer(SocketServer.BaseRequestHandler):
         if(os.path.isdir(os.curdir + path)):
             if(path[-1] != "/"):
                 path += "/";
+                self.responseHeader += "HTTP/1.1 301 MOVED PERMANENTLY\r\n"
                 #redirect to path with that /.
             #don't redirect for index.
             path += "index.html"
+            self.contents = self.mimeTypeGet(path)
         #check if file or dir exist.
         print("Path request is: " + path + "\n")
         #checking if it is a file and printing 200 code if it is ok
         if(os.path.isfile(os.curdir + path)):
-            self.responseHeader += "200 OK\r\n"
+            self.responseHeader += "HTTP/1.1 200 OK\r\n"
             #checking for mimetypes and reading them into content.
             self.contents = self.mimeTypeGet(path)
         else:
-            self.responseHeader += "404 NOT FOUND\r\n"
+            self.responseHeader += "HTTP/1.1 404 NOT FOUND\r\n"
             self.contents = "<html><head></head><body><h1>404 NOT FOUND</h1></body></html>"
             
     def handle(self):
