@@ -97,8 +97,9 @@ class MyWebServer(SocketServer.BaseRequestHandler):
             #better to post a 302 and redirect.
             self.responseHeader += "HTTP/1.1 302 FOUND\r\n"
             path += "/index.html"
+            self.responseHeader += "Location: " + path +"\r\n"
             self.contents = self.mimeTypeGet(path)
-            self.responseHeader+="\n\n"
+            return
         #check if file or dir exist.
         print("Path request is: " + path + "\n")
         #checking if it is a file and printing 200 code if it is ok
