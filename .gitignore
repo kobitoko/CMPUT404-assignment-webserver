@@ -3,6 +3,9 @@
 # temp files
 *~
 
+# runner.sh gen
+*/hardcode/
+
 # C extensions
 *.so
 
