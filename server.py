@@ -4,6 +4,8 @@ import SocketServer
 # https://docs.python.org/2/library/os.path.html
 import os.path
 
+import time
+
 # Copyright 2016 Abram Hindle, Eddie Antonio Santos, Preyanshu Kumar, Ryan Satyabrata
 # 
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -52,29 +54,36 @@ class MyWebServer(SocketServer.BaseRequestHandler):
         file = open(pathStr[1:], 'rb')
         return file.read()
         
+    def getDateTime(self):
+        # https://docs.python.org/2/library/time.html#module-time
+        # Format example Date (Must be in GMT): Tue, 15 Nov 1994 08:12:31 GMT
+        dateTime = time.gmtime(time.time())
+        dateTime = time.strftime("Date: %a, %d %b %Y %H:%M:%S GMT\r\n", dateTime)
+        return dateTime;
+        
     def mimeTypeGet(self, filepath):
         # Usually the extension is the last bit after the "."
         fileName = filepath.split('.')[-1]
-        type = ""
+        isText = True
         if (fileName == "html"):
-            type = "text"
-            self.responseHeader += "Content-Type: text/html;"
+            self.responseHeader += "Content-Type: text/html;\r\n"
         elif (fileName == "css"):
-            type = "text"
-            self.responseHeader += "Content-Type: text/css;"
+            self.responseHeader += "Content-Type: text/css;\r\n"
         elif (fileName == "jpg" or fileName == "jpeg"):
-            type = "image"
-            self.responseHeader += "Content-Type: image/jpeg"
+            isText = False
+            self.responseHeader += "Content-Type: image/jpeg;\r\n"
         elif (fileName == "png"):
-            type = "image"
-            self.responseHeader += "Content-Type: image/png"
+            isText = False
+            self.responseHeader += "Content-Type: image/png;\r\n"
         elif (fileName == "gif"):
-            type = "image"
-            self.responseHeader += "Content-Type: image/gif"
-            
-        if (type == "text"):
+            isText = False
+            self.responseHeader += "Content-Type: image/gif;\r\n"
+        # Retrieve file size.
+        self.responseHeader += "Content-Length: " + str(os.path.getsize(filepath[1:])) + "\r\n"
+        # Load content
+        if (isText):
             return self.openTextFile(filepath)
-        elif (type == "image"):
+        elif (not isText):
             return self.openBinary(filepath)
     
     # Retrieves and access path. 
@@ -112,8 +121,10 @@ class MyWebServer(SocketServer.BaseRequestHandler):
             self.responseHeader += "HTTP/1.1 200 OK\r\n"
             #checking for mimetypes and reading them into content.
             self.contents = self.mimeTypeGet(path)
+            
         else:
             self.responseHeader += "HTTP/1.1 404 NOT FOUND\r\n"
+            self.responseHeader += "Content-Type: text/html;\r\n"
             self.contents = "<html><head></head><body><h1>404 NOT FOUND</h1></body></html>"
             
     def handle(self):
@@ -121,11 +132,17 @@ class MyWebServer(SocketServer.BaseRequestHandler):
         print ("Got a request of: %s\n" % self.data)
         print "Client address: %s" % self.client_address[0]
         requestHeader = self.data.split(" ")
-        self.retrievePath(requestHeader)
+        if(requestHeader[0].upper() == "GET"):
+            self.retrievePath(requestHeader)
+        else:
+            self.responseHeader = "HTTP/1.1 501 NOT IMPLEMENTED\r\n"
         
+        # All needs date according to 14.18 https://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html 
+        self.responseHeader += self.getDateTime();
+                
         # sendall for tcp according to https://docs.python.org/2/library/socketserver.html#examples
         # Needs empty line to show end of header. Also using windows CR-LF new lines.
-        self.request.sendall(self.responseHeader + "\r\n\r\n" + self.contents)
+        self.request.sendall(self.responseHeader + "\r\n" + self.contents)
 
 if __name__ == "__main__":
     HOST, PORT = "localhost", 8080
