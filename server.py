@@ -129,8 +129,6 @@ class MyWebServer(SocketServer.BaseRequestHandler):
             
     def handle(self):
         self.data = self.request.recv(1024).strip()
-        print ("Got a request of: %s\n" % self.data)
-        print "Client address: %s" % self.client_address[0]
         requestHeader = self.data.split(" ")
         if(requestHeader[0].upper() == "GET"):
             self.retrievePath(requestHeader)
